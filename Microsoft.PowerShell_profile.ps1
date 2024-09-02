@@ -1,3 +1,8 @@
+# Custom prompt function for PowerShell 7 and PowerShell 5
+# To link PS5 profile to PS7's file, run this as admin in PS5: 
+# mkdir (Split-Path $PROFILE -Parent)
+# ni -Type HardLink -Path $PROFILE -Target (pwsh -c `$PROFILE)
+
 function prompt {
     # Prompt color based on admin permissions
     $isAdmin = (New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)

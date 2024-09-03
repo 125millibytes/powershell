@@ -6,7 +6,7 @@
 function prompt {
     # Prompt color based on admin permissions
     $isAdmin = (New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-    $promptForegroundColor = if($isAdmin) {'DarkYellow'} else {'DarkGreen'}
+    $promptForegroundColor = if($isAdmin) {'DarkYellow'} else {'DarkCyan'}
     
     # check history to see if previous prompt was cancelled
     $newHistoryCount = @(Get-History).Count

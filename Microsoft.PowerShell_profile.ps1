@@ -6,7 +6,7 @@
 function prompt {
     # Prompt color based on admin permissions
     $isAdmin = (New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-    $promptForegroundColor = if($isAdmin) {'DarkYellow'} else {'DarkCyan'}
+    $promptForegroundColor = if($isAdmin) {'DarkYellow'} else {'DarkGreen'}
     
     # check history to see if previous prompt was cancelled
     $newHistoryCount = @(Get-History).Count
@@ -33,10 +33,10 @@ function prompt {
     $promptLength += 2;
 
     # set continuation prompt to be on same position as main prompt
-    $continuationPrompt = " " * $promptLength + "$promptIndicator"
+    $continuationPrompt = "·" * $promptLength + "$promptIndicator"
 
     # to make red prompt on syntax error work again.
-    Set-PSReadLineOption -PromptText "$promptIndicator" -ExtraPromptLineCount 2 -ContinuationPrompt $continuationPrompt
+    Set-PSReadLineOption -PromptText "$promptIndicator" -ExtraPromptLineCount 2 -ContinuationPrompt $continuationPrompt -Colors @{ContinuationPrompt = 'Gray'}
 
-    "$promptIndicator"
+    $promptIndicator
 }

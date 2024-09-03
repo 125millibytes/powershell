@@ -32,8 +32,8 @@ function prompt {
     Write-Host "PS" -ForegroundColor $promptForegroundColor -NoNewLine # with version number: "PS$($PSVersionTable.PSVersion.Major)"
     $promptLength += 2;
 
-    # set continuation prompt to be on same position as main prompt
-    $continuationPrompt = "·" * $promptLength + "$promptIndicator"
+    # set continuation prompt to be on same position as main prompt. U+00B7 is '·' middle dot
+    $continuationPrompt = [string][char]0x00B7 * $promptLength + "$promptIndicator"
 
     # to make red prompt on syntax error work again.
     Set-PSReadLineOption -PromptText "$promptIndicator" -ExtraPromptLineCount 2 -ContinuationPrompt $continuationPrompt -Colors @{ContinuationPrompt = 'Gray'}

@@ -19,17 +19,24 @@ function prompt {
         Write-Host $pwd -ForegroundColor DarkGray        
     }
 
-    # hex code for '›' to make it work with PowerShell 5 default encoding
-    $promptIndicator = [string][char]0x203A
-    
-    #write the main prompt
+    # hex codes for '›' and '»' to make it work with PowerShell 5 default encoding
+    $promptIndicator = if($NestedPromptLevel -lt 1) {[string][char]0x203A} else {[string][char]0x00BB}
+    $promptIndicator = "$promptIndicator "
+
+    # write the main prompt
+    $promptLength = 0;
     if($PSDebugContext) {
         Write-Host "[DBG]: " -NoNewLine -ForegroundColor Cyan
+        $promptLength += 7;
     }
     Write-Host "PS" -ForegroundColor $promptForegroundColor -NoNewLine # with version number: "PS$($PSVersionTable.PSVersion.Major)"
+    $promptLength += 2;
 
-    # to make red prompt on syntax error work again. TODO: make continuatino prompt length match prompts length
-    Set-PSReadLineOption -PromptText "$promptIndicator " -ExtraPromptLineCount 2 -ContinuationPrompt "..$promptIndicator "
+    # set continuation prompt to be on same position as main prompt
+    $continuationPrompt = " " * $promptLength + "$promptIndicator"
 
-    $promptIndicator * ($NestedPromptLevel+1) + " "
+    # to make red prompt on syntax error work again.
+    Set-PSReadLineOption -PromptText "$promptIndicator" -ExtraPromptLineCount 2 -ContinuationPrompt $continuationPrompt
+
+    "$promptIndicator"
 }

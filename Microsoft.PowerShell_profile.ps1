@@ -29,7 +29,7 @@ function prompt {
         Write-Host "[DBG]: " -NoNewLine -ForegroundColor Cyan
         $promptLength += 7;
     }
-    $promptText = "PS$($PSVersionTable.PSVersion.Major)" # with version number
+    $promptText = "PS" #+ $($PSVersionTable.PSVersion.Major) # with version number
     Write-Host $promptText -ForegroundColor $promptForegroundColor -NoNewLine
     $promptLength += $promptText.Length;
 

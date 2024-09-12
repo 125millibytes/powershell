@@ -29,8 +29,9 @@ function prompt {
         Write-Host "[DBG]: " -NoNewLine -ForegroundColor Cyan
         $promptLength += 7;
     }
-    Write-Host "PS" -ForegroundColor $promptForegroundColor -NoNewLine # with version number: "PS$($PSVersionTable.PSVersion.Major)"
-    $promptLength += 2;
+    $promptText = "PS$($PSVersionTable.PSVersion.Major)" # with version number
+    Write-Host $promptText -ForegroundColor $promptForegroundColor -NoNewLine
+    $promptLength += $promptText.Length;
 
     # set continuation prompt to be on same position as main prompt. U+00B7 is '·' middle dot
     $continuationPrompt = [string][char]0x00B7 * $promptLength + "$promptIndicator"

@@ -26,10 +26,14 @@ function prompt {
     # write the main prompt
     $promptLength = 0;
     if($PSDebugContext) {
-        Write-Host "[DBG]: " -NoNewLine -ForegroundColor Cyan
-        $promptLength += 7;
+        # debug mode indicator
+        $promptText = "[DBG] "
+        Write-Host $promptText -NoNewLine -ForegroundColor Cyan
+        $promptLength += $promptText.Length;
     }
-    $promptText = "PS" #+ $($PSVersionTable.PSVersion.Major) # with version number
+
+    # PS = PowerShell
+    $promptText = "PS" #+ $($PSVersionTable.PSVersion.Major) # with version number?
     Write-Host $promptText -ForegroundColor $promptForegroundColor -NoNewLine
     $promptLength += $promptText.Length;
 

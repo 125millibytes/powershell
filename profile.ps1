@@ -4,7 +4,6 @@
 #   mkdir ($PROFILE.CurrentUserAllHosts | Split-Path -Parent) -ea SilentlyContinue
 #   ni -Type HardLink -Path ($PROFILE.CurrentUserAllHosts) -Target (pwsh -c `$PROFILE.CurrentUserAllHosts)
 
-Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # Store the original prompt function to allow reverting in case of errors
@@ -17,39 +16,72 @@ $isAdmin = $user.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator
 # initialize history ID to non-null value to show path on first prompt
 $script:lastHistoryId = -1
 
-$esc = [char]27
-$resetFormat = "$esc[0m"
-
-# Colors
-# ANSI color codes: Black=30, Red=31, Green=32, Yellow=33, Blue=34, Magenta=35, Cyan=36, White=37, Default=39
-# TODO: Workaround for dim mode (`e[2m) having the reverse effect in light theme, because it makes the text darker regardless of background color.
-
-# PSReadLine syntax highlighting colors
-Set-PSReadLineOption -Colors @{
-    Default = "$esc[37m";
-    Keyword = "$esc[95m";
-    Operator="$esc[96m";
-    Member = "$esc[33m";
-    Variable="$esc[36m";
-    Type = "$esc[34m";
-    Number = "$esc[92m";
-    String = "$esc[34m";
-    Command = "$esc[93m";
-    Parameter="$esc[36m";
+# Colors and fornmtting
+try{
+    # ANSI color codes: `e[XYm
+    # X: 3 = foreground, 4 = background, 9 = bright, 10 = bright background
+    # Y: 30 = Black, 31 = Red, 32 = Green, 33 = Yellow, 34 = Blue, 35 = Magenta, 36 = Cyan, 37 = White, 39 = Default
+    # TODO: Workaround for dim mode (`e[2m) having the reverse effect in Windows Terminal light themes, because it makes the text darker regardless of background color.
     
-    Error = "$esc[91m";
-    Selection = "$esc[30;47m";
-    Emphasis = "$esc[96m";
-    InlinePrediction = "$esc[90;3m";
-    ListPrediction = "$esc[30m";
-    ListPredictionSelected = "$esc[37;100m";`
+    $esc = [char]27
+    $resetFormat = "$esc[0m"
 
-    #ContinuationPrompt ?
-    #ListPredictionTooltip ?
+    # PSReadLine syntax highlighting colors
+    Set-PSReadLineOption -Colors @{
+        Default = "$esc[37m"
+        Keyword = "$esc[95m"
+        Operator="$esc[36m"
+        Member = "$esc[33m"
+        Variable = "$esc[96m"
+        Type = "$esc[34m"
+        Number = "$esc[92m"
+        String = "$esc[34m"
+        Command = "$esc[93m"
+        Parameter = "$esc[36m"
+        
+        Error = "$esc[91m"
+        Selection = "$esc[30;47m"
+        Emphasis = "$esc[96m"
+        InlinePrediction = "$esc[90;3m"
+        ListPrediction = "$esc[30m"
+        ListPredictionSelected = "$esc[37;100m"
+
+        #ContinuationPrompt ?
+        #ListPredictionTooltip ?
+    }
+
+
+    # FileInfo colors
+    $PSStyle.FileInfo.Directory = "$esc[94m"
+    $PSStyle.FileInfo.SymbolicLink = "$esc[35m"
+    $PSStyle.FileInfo.Executable = "$esc[93m"
+
+    $extensionColors = @{
+        "$esc[36m" = '.zip','.tgz','.gz','.tar','.7z','.rar','.iso','.vhd','.vhdx';
+        "$esc[93m" = '.ps1';
+        "$esc[33m" = '.psd1','.psm1','.ps1xml';
+    }
+    foreach ($ext in $extensionColors.GetEnumerator()){
+        $ext.Value | % {$PSStyle.FileInfo.Extension[$_] = $ext.Key}
+    }
+
+    # Formatting colors
+    $formattingColors = @{
+        Error = "$esc[91m"
+        Warning = "$esc[93m"
+        Verbose = "$esc[93m"
+        Debug = "$esc[93m"
+        TableHeader ="$esc[92m"
+        CustomTableHeaderLabel = "$esc[32m"
+        FormatAccent = "$esc[32m"
+    } 
+    $formattingColors.GetEnumerator() | % {$PSStyle.Formatting.$($_.Key) = $_.Value}
+
+} catch {
+    Write-Output "Error setting PSReadLine and `$PSStyle colors`n$_"
 }
 
-
-# Prompt format ANSI escape codes (Normal, Error, Path, Debug, Continuation, Indicator)
+# Prompt format (Normal, Error, Path, Debug, Continuation, Indicator)
 $pfNor = if($isAdmin) {"$esc[1;33m"} else {"$esc[1;34m"}
 $pfErr = "$esc[1;31m"
 $pfCon = $pfNor # "$esc[90m"
@@ -63,12 +95,7 @@ $pfIndCon = "$esc[1;39m"
 function prompt {
     try{
         # check history to see if previous prompt was cancelled
-        $lastCommand = Get-History -Count 1
-        if($lastCommand) {
-            $newHistoryId = $lastCommand.Id
-        } else {
-            $newHistoryId = $null
-        }
+        $newHistoryId = (Get-History -Count 1).Id
         $previousPromptCancelled = $script:lastHistoryId -eq $newHistoryId
         $script:lastHistoryId = $newHistoryId
 
@@ -101,9 +128,7 @@ function prompt {
         $promptlength = $promptDebugTag.Length + $promptText.Length
         $continuationPrompt = "$pfCon{0}$resetFormat$pfIndCon{1}$resetFormat" -f ([string][char]0x00B7 * $promptlength), $promptIndicator
 
-        #Set-PSReadLineOption -PromptText "$promptText$promptIndicator" -ExtraPromptLineCount 2 -ContinuationPrompt "$continuationPrompt" -Colors @{ContinuationPrompt = 'Gray'}
-        
-        # Configure PSReadLine with custom prompt for error and continuation vatiants
+        # Configure PSReadLine for custom prompt, with error and continuation vatiants
         Set-PSReadLineOption -PromptText $promptNormal,$promptError -ContinuationPrompt $continuationPrompt
 
         # Return prompt
@@ -134,4 +159,3 @@ function Watch-Connection {
 }
 
 sal dauerping Watch-Connection
-

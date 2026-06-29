@@ -41,17 +41,17 @@ try{
         Error = "$esc[91m"
         Selection = "$esc[30;47m"
         Emphasis = "$esc[96m"
-        InlinePrediction = "$esc[90;3m"
-
+        
         #ContinuationPrompt ?
         #ListPredictionTooltip ?
     }
-
+    
     # Prediction list is only available in PS7+
     if($PSVersionTable.PSVersion.Major -ge 7){
         Set-PSReadLineOption -Colors @{
             ListPrediction = "$esc[30m"
             ListPredictionSelected = "$esc[37;100m"
+            InlinePrediction = "$esc[90;3m"
         }
     }
 

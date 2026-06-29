@@ -26,7 +26,7 @@ try{
     $esc = [char]27
     $resetFormat = "$esc[0m"
 
-    # PSReadLine colors (syntax highlighting ...)
+    # PSReadLine colors for PS5 and PS7+ (syntax highlighting ...)
     Set-PSReadLineOption -Colors @{
         Default = "$esc[37m"
         Keyword = "$esc[95m"
@@ -46,40 +46,43 @@ try{
         #ListPredictionTooltip ?
     }
     
-    # Prediction list is only available in PS7+
+    # Color customization for PS7+
     if($PSVersionTable.PSVersion.Major -ge 7){
+        # PSReadLine predictions colors
         Set-PSReadLineOption -Colors @{
             ListPrediction = "$esc[30m"
             ListPredictionSelected = "$esc[37;100m"
             InlinePrediction = "$esc[90;3m"
         }
-    }
 
-    # FileInfo colors
-    $PSStyle.FileInfo.Directory = "$esc[94m"
-    $PSStyle.FileInfo.SymbolicLink = "$esc[35m"
-    $PSStyle.FileInfo.Executable = "$esc[93m"
+        # PSStyle fileInfo colors
+        $PSStyle.FileInfo.Directory = "$esc[94m"
+        $PSStyle.FileInfo.SymbolicLink = "$esc[35m"
+        $PSStyle.FileInfo.Executable = "$esc[93m"
 
-    $extensionColors = @{
-        "$esc[36m" = '.zip','.tgz','.gz','.tar','.7z','.rar','.iso','.vhd','.vhdx';
-        "$esc[93m" = '.ps1';
-        "$esc[33m" = '.psd1','.psm1','.ps1xml';
-    }
-    foreach ($ext in $extensionColors.GetEnumerator()){
-        $ext.Value | % {$PSStyle.FileInfo.Extension[$_] = $ext.Key}
-    }
+        # PSStyle file extensions colors
+        $extensionColors = @{
+            "$esc[36m" = '.zip','.tgz','.gz','.tar','.7z','.rar','.iso','.vhd','.vhdx';
+            "$esc[93m" = '.ps1';
+            "$esc[33m" = '.psd1','.psm1','.ps1xml';
+        }
+        foreach ($ext in $extensionColors.GetEnumerator()){
+            $ext.Value | % {$PSStyle.FileInfo.Extension[$_] = $ext.Key}
+        }
+        
+        # PSStyle formatting colors
+        $formattingColors = @{
+            Error = "$esc[91m"
+            Warning = "$esc[93m"
+            Verbose = "$esc[93m"
+            Debug = "$esc[93m"
+            TableHeader ="$esc[92m"
+            CustomTableHeaderLabel = "$esc[32m"
+            FormatAccent = "$esc[32m"
+        } 
+        $formattingColors.GetEnumerator() | % {$PSStyle.Formatting.$($_.Key) = $_.Value}
 
-    # Formatting colors
-    $formattingColors = @{
-        Error = "$esc[91m"
-        Warning = "$esc[93m"
-        Verbose = "$esc[93m"
-        Debug = "$esc[93m"
-        TableHeader ="$esc[92m"
-        CustomTableHeaderLabel = "$esc[32m"
-        FormatAccent = "$esc[32m"
-    } 
-    $formattingColors.GetEnumerator() | % {$PSStyle.Formatting.$($_.Key) = $_.Value}
+    }
 
 } catch {
     Write-Output "Error setting PSReadLine and `$PSStyle colors`n$_"

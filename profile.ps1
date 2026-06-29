@@ -20,13 +20,13 @@ $script:lastHistoryId = -1
 try{
     # ANSI color codes: `e[XYm
     # X: 3 = foreground, 4 = background, 9 = bright, 10 = bright background
-    # Y: 30 = Black, 31 = Red, 32 = Green, 33 = Yellow, 34 = Blue, 35 = Magenta, 36 = Cyan, 37 = White, 39 = Default
+    # Y: 0 = Black, 1 = Red, 2 = Green, 3 = Yellow, 4 = Blue, 5 = Magenta, 6 = Cyan, 7 = White, 9 = Default
     # TODO: Workaround for dim mode (`e[2m) having the reverse effect in Windows Terminal light themes, because it makes the text darker regardless of background color.
     
     $esc = [char]27
     $resetFormat = "$esc[0m"
 
-    # PSReadLine syntax highlighting colors
+    # PSReadLine colors (syntax highlighting ...)
     Set-PSReadLineOption -Colors @{
         Default = "$esc[37m"
         Keyword = "$esc[95m"
@@ -38,18 +38,22 @@ try{
         String = "$esc[34m"
         Command = "$esc[93m"
         Parameter = "$esc[36m"
-        
         Error = "$esc[91m"
         Selection = "$esc[30;47m"
         Emphasis = "$esc[96m"
         InlinePrediction = "$esc[90;3m"
-        ListPrediction = "$esc[30m"
-        ListPredictionSelected = "$esc[37;100m"
 
         #ContinuationPrompt ?
         #ListPredictionTooltip ?
     }
 
+    # Prediction list is only available in PS7+
+    if($PSVersionTable.PSVersion.Major -ge 7){
+        Set-PSReadLineOption -Colors @{
+            ListPrediction = "$esc[30m"
+            ListPredictionSelected = "$esc[37;100m"
+        }
+    }
 
     # FileInfo colors
     $PSStyle.FileInfo.Directory = "$esc[94m"

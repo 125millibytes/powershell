@@ -16,7 +16,7 @@ $isAdmin = $user.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator
 # initialize history ID to non-null value to show path on first prompt
 $script:lastHistoryId = -1
 
-# Colors and fornmtting
+# Colors and formatting
 try{
     # ANSI color codes: `e[XYm
     # X: 3 = foreground, 4 = background, 9 = bright, 10 = bright background
@@ -81,7 +81,6 @@ try{
             FormatAccent = "$esc[32m"
         } 
         $formattingColors.GetEnumerator() | % {$PSStyle.Formatting.$($_.Key) = $_.Value}
-
     }
 
 } catch {
@@ -163,6 +162,12 @@ function Watch-Connection {
 
     Test-Connection -ComputerName $ComputerName -Continuous | 
       Select-Object @{Label='Time';Expression={Get-Date}},Ping,Address,Status,Latency
+}
+
+#Load Custom Modules
+$customModulePath = Join-Path $PSScriptRoot 'MyModules'
+if((Test-Path $customModulePath) -and $customModulePath -notin ($env:PSModulePath -split [IO.Path]::PathSeparator)){
+    $env:PSModulePath += [IO.Path]::PathSeparator + $customModulePath
 }
 
 sal dauerping Watch-Connection

@@ -154,6 +154,10 @@ if($PSVersionTable.PSVersion.Major -ge 7){
     set-PSReadLineKeyHandler -Chord 'Ctrl+B' -Function GotoBrace # Ctrl-Shift+B because the default Ctrl+] is not a thing on German keyboards
 }
 
+# Opt out of telemetry
+# TODO: Confirm this works when setting the variable after the process started
+$env:POWERSHELL_TELEMETRY_OPTOUT = 1
+
 # Custom functions
 function Watch-Connection {
     param (
